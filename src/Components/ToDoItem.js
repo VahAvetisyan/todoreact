@@ -1,92 +1,81 @@
-import React from "react";
+import React, { useState } from "react";
+import { deleteTodo, toggleTodoState } from "../redux/todo";
+import { useDispatch } from "react-redux";
 
-export class ToDoItem extends React.Component {
-  constructor(...args) {
-    super(...args);
-    this.state = {
-      editingName: this.props.toDo.name,
-      isEditing: false,
-    };
-  }
+const ToDoItem = ({ toDo, changeIsChecking, onSave }) => {
+  const dispatch = useDispatch();
+  const [editingName, setEditingName] = useState(toDo.name);
+  const [isEditing, setIsEditing] = useState(false);
 
-  onEditingNameChange = (e) => {
-    this.setState({
-      editingName: e.target.value,
-    });
+  const onEditingNameChange = (e) => {
+    setEditingName(e.target.value);
   };
 
-  onSaveClick = () => {
-    this.setState({
-      isEditing: false,
-    });
-    this.props.onSave(this.props.toDo.id, this.state.editingName);
+  const onSaveClick = () => {
+    setIsEditing(false);
+    onSave(toDo.id, editingName);
   };
 
-  onCancelClick = () => {
-    const { toDo } = this.props;
-    this.setState({
-      editingName: toDo.name,
-      isEditing: false,
-    });
+  const onCancelClick = () => {
+    setEditingName(toDo.name);
+    setIsEditing(false);
   };
 
-  render() {
-    const { toDo, onDelete, changeIsChecking } = this.props;
-    return (
-      <div className="toDo-item">
-        {this.state.isEditing ? (
-          <>
+  return (
+    <div className="toDo-item">
+      {isEditing ? (
+        <>
+          <input
+            id="edit-input"
+            onChange={onEditingNameChange}
+            value={editingName}
+          />
+          <button className="btn btn-save" onClick={onSaveClick}>
+            Save
+          </button>
+          <button className="btn btn-cancel" onClick={onCancelClick}>
+            Cancel
+          </button>
+        </>
+      ) : (
+        <>
+          <div
+            id="toDo-name"
+            className={toDo.checked ? "checked-toDo" : "unchecked-toDo"}
+          >
             <input
-              id="edit-input"
-              onChange={this.onEditingNameChange}
-              value={this.state.editingName}
+              type="checkbox"
+              checked={toDo.checked}
+              onChange={(e) => {
+                dispatch(toggleTodoState(toDo.id));
+              }}
             />
-            <button className="btn btn-save" onClick={this.onSaveClick}>
-              Save
-            </button>
-            <button className="btn btn-cancel" onClick={this.onCancelClick}>
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <div
-              id="toDo-name"
-              className={toDo.checked ? "checked-toDo" : "unchecked-toDo"}
+            <span>{toDo.name}</span>
+          </div>
+          <div className="btns-del-edit">
+            <button
+              className="btn btn-del"
+              onClick={() => {
+                dispatch(deleteTodo(toDo.id));
+              }}
             >
-              <input
-                type="checkbox"
-                checked={toDo.checked}
-                onChange={(e) => {
-                  console.log(e.target.checked);
-                  changeIsChecking(toDo.id, e.target.checked);
-                }}
-              />
-              <span>{toDo.name}</span>
-            </div>
-            <div className="btns-del-edit">
-              <button
-                className="btn btn-del"
-                onClick={() => {
-                  onDelete(toDo.id);
-                }}
-              >
-                Del
-              </button>
-              <button
-                className="btn btn-edit"
-                onClick={() => {
-                  this.setState({
-                    isEditing: true,
-                  });
-                }}
-              >
-                Edit
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-}
+              Del
+            </button>
+            <button
+              className="btn btn-edit"
+              onClick={() => {
+                this.setState({
+                  isEditing: true,
+                });
+              }}
+            >
+              Edit
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ToDoItem;
