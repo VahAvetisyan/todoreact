@@ -1,6 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addTodo, setTodoName } from "../redux/todo";
+import { setTodoName } from "../redux/todo";
+import { collection, addDoc } from "firebase/firestore"; 
+import { db } from "../Firebase/firebase";
 
 const Header = () => {
   const toDoName = useSelector((state) => state.todo.toDoName);
@@ -8,14 +10,21 @@ const Header = () => {
 
   const onToDoChange = (e) => dispatch(setTodoName(e.target.value));
 
-  const onAddBtnClick = () =>
-    dispatch(
-      addTodo({
-        name: toDoName,
-        id: Math.random(),
-        checked: false,
-      })
-    );
+  // const onAddBtnClick = () =>
+  //   dispatch(
+  //     addTodo({
+  //       name: toDoName,
+  //       id: Math.random(),
+  //       checked: false,
+  //     })
+  //   );
+
+  const onAddBtnClick = async () =>{
+    await addDoc(collection(db, "todoitems"), {
+      name: toDoName,
+      checked: false,
+    });
+  }
 
   return (
     <>
